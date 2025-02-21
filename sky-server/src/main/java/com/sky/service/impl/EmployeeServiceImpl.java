@@ -1,7 +1,10 @@
 package com.sky.service.impl;
 
 import com.sky.constant.MessageConstant;
+import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
+import com.sky.context.BaseContext;
+import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
@@ -9,15 +12,20 @@ import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.service.EmployeeService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+
+import java.time.LocalDateTime;
+
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
     private EmployeeMapper employeeMapper;
+
 
     /**
      * 员工登录
@@ -29,6 +37,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         String username = employeeLoginDTO.getUsername();
         String password = employeeLoginDTO.getPassword();
 
+
         //1、根据用户名查询数据库中的数据
         Employee employee = employeeMapper.getByUsername(username);
 
@@ -39,7 +48,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         //密码比对
-        // TODO 后期需要进行md5加密，然后再进行比对
+        // 进行MD5加密
+        password = DigestUtils.md5DigestAsHex(password.getBytes());
+
         if (!password.equals(employee.getPassword())) {
             //密码错误
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
@@ -54,4 +65,32 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employee;
     }
 
+    /**
+     * 新增员工
+     * @param employeeDTO
+     */
+    @Override
+    public void save(EmployeeDTO employeeDTO) {
+        //将DTO对象转换为实体对象
+        Employee employee = new Employee();
+        //对象属性拷贝
+        BeanUtils.copyProperties(employeeDTO, employee);
+        //设置其他的属性
+        //帐号状态(0：禁用，1：正常)
+        employee.setStatus(StatusConstant.ENABLE);
+        //设置密码(默认123456，需要md5加密)
+        employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
+        //创建时间
+        employee.setCreateTime(LocalDateTime.now());
+        //更新时间
+        employee.setUpdateTime(LocalDateTime.now());
+        //创建者,更新者(ThreadLocal中获取当前登录员工的ID)
+        employee.setCreateUser(BaseContext.getCurrentId());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+
+        //清理当前线程的绑定数据
+        BaseContext.removeCurrentId();
+
+        employeeMapper.addEmployee(employee);
+    }
 }
