@@ -52,7 +52,8 @@ public class AliOssUtil {
             }
         }
 
-        //文件访问路径规则 https://BucketName.Endpoint/ObjectName
+        //文件访问路径规则 https://dycccc.oss-cn-beijing.aliyuncs.com/name.png
+        //endpoint=https://oss-cn-beijing.aliyuncs.com   bucketName=dycccc
         StringBuilder stringBuilder = new StringBuilder("https://");
         stringBuilder
                 .append(bucketName)
