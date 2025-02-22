@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -82,7 +83,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         //select * from employee limit 0,10
         // 设置分页参数：当前页码和每页大小
         PageMethod.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
-        // 执行分页查询
+        // 执行分页查询(用page接受)
         Page<Employee> page = employeeMapper.pageQuery(employeePageQueryDTO);
         // 获取总记录数
         long total = page.getTotal();
@@ -93,8 +94,53 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     /**
-     * 新增员工
+     * 启用禁用员工账号
      *
+     * @param status
+     * @param id
+     */
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        /*Employee employee = new Employee();
+        employee.setStatus(status);
+        employee.setId(id);*/
+        Employee employee = Employee.builder()
+                .status(status)
+                .id(id)
+                .build();
+
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 根据id查询员工信息
+     * @param id
+     * @return
+     */
+    @Override
+    public Employee getById(Long id) {
+        Employee employe = employeeMapper.getById(id);
+        employe.setPassword("***");
+        return employe;
+    }
+
+    /**
+     * 编辑员工信息
+     * @param employeeDTO
+     */
+    @Override
+    public void update(EmployeeDTO employeeDTO) {
+        //对象属性拷贝
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO, employee);
+        //更新时间,更新者
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 新增员工
      * @param employeeDTO
      */
     @Override
