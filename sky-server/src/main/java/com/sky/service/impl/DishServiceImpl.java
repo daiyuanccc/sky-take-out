@@ -12,6 +12,7 @@ import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
+import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
@@ -34,6 +35,8 @@ public class DishServiceImpl implements DishService {
     private DishFlavorMapper dishFlavorMapper;
     @Autowired
     private SetmealDishMapper setmealDishMapper;
+    @Autowired
+    private SetmealMapper setmealMapper;
 
     /**
      * 新增菜品和口味
@@ -114,11 +117,29 @@ public class DishServiceImpl implements DishService {
                 .status(status)
                 .id(id)
                 .build();
+        //判断状态(如果前端传回0-要停售)
+        if (dish.getStatus() == 0) {
+            //判断菜品是否关联了套餐
+            List<Long> setmealIds = setmealDishMapper.getSetmealIdsByDishIds(Collections.singletonList(id));
+            if (setmealIds != null && !setmealIds.isEmpty()) {
+                //判断关联的套餐是否起售
+                for (Long setmealId : setmealIds) {
+                    //判断套餐是否起售
+                    Integer setmealStatus = setmealMapper.getById(setmealId).getStatus();
+                    if (setmealStatus == 1) {
+                        throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_STOP);
+                    }
+                }
+                //throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
+            }
+        }
+
         dishMapper.update(dish);
     }
 
     /**
      * 根据id查询菜品和对应的口味数据
+     *
      * @param id
      * @return
      */
@@ -138,6 +159,7 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 根据id修改菜品和对应的口味数据
+     *
      * @param dishDTO
      */
     @Override
@@ -162,6 +184,7 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 根据分类id查询菜品
+     *
      * @param categoryId
      * @return
      */

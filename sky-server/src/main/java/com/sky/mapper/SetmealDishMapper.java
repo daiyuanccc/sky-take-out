@@ -20,7 +20,7 @@ public interface SetmealDishMapper {
     List<Long> getSetmealIdsByDishIds(List<Long> dishIds);
 
     /**
-     * 保存套餐菜品信息
+     * 批量保存套餐菜品信息
      * @param setmealDishes
      */
     void insertDishsBySetmealId(List<SetmealDish> setmealDishes);
@@ -45,4 +45,7 @@ public interface SetmealDishMapper {
      * @param ids
      */
     void deleteByDishIds(List<Long> ids);
+
+    @Select("select * from setmeal_dish where setmeal_id = #{setmealId}")
+    List<SetmealDish> getBySetmealId(Long setmealId);
 }

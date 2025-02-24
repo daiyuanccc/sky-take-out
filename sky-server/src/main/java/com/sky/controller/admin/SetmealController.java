@@ -75,7 +75,7 @@ public class SetmealController {
     }
 
     /**
-     * 修改套餐起售停售
+     * 套餐起售停售
      * @param status
      * @param id
      * @return

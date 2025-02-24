@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -47,6 +46,7 @@ public class SetmealServiceImpl implements SetmealService {
         Setmeal setmeal = new Setmeal();
         BeanUtils.copyProperties(setmealDTO, setmeal);
         setmealMapper.insert(setmeal);
+        //Mybatis返回主键值
         log.info("插入后的套餐ID: {}", setmeal.getId());
         //2.保存套餐菜品到setmeal_dish表
         List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
@@ -120,8 +120,8 @@ public class SetmealServiceImpl implements SetmealService {
         //4.判断套餐菜品是否可售
         //TODO 修改前端判断套餐菜品是否可售
         for (SetmealDish setmealDish : setmealDishes) {
-            Long dishId = setmealDish.getDishId();
-            Dish dish = dishMapper.getById(dishId);
+            //获取菜品数据,判断菜品是否可售
+            Dish dish = dishMapper.getById(setmealDish.getDishId());
             if (dish.getStatus() == 0) {
                 throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ENABLE_FAILED);
             }
@@ -146,6 +146,17 @@ public class SetmealServiceImpl implements SetmealService {
                 .status(status)
                 .id(id)
                 .build();
+        //判断套餐中的菜品是否起售
+        //获取套餐菜品表中的数据
+        List<SetmealDish> setmealDishs = setmealDishMapper.getBySetmealId(id);
+        for (SetmealDish setmealDish : setmealDishs) {
+            //获取菜品id
+            Long dishId = setmealDish.getDishId();
+            Dish dish = dishMapper.getById(dishId);
+            if (dish.getStatus() == 0) {
+                throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ENABLE_FAILED);
+            }
+        }
         setmealMapper.update(setmeal);
     }
 
@@ -167,10 +178,8 @@ public class SetmealServiceImpl implements SetmealService {
                 throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ON_SALE);
             }
         }
-
         //批量删除套餐
         setmealMapper.deleteBatch(ids);
-
         //删除套餐菜品
         setmealDishMapper.deleteByDishIds(ids);
 
