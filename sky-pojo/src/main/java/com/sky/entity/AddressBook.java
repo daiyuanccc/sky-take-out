@@ -18,6 +18,7 @@ public class AddressBook implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    //主键地址id
     private Long id;
 
     //用户id

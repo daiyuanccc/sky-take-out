@@ -45,7 +45,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         //获取用户id
         Long userId = BaseContext.getCurrentId();
         shoppingCart.setUserId(userId);
-
+        // 判断当前菜品或套餐是否在购物车中
         List<ShoppingCart> list = shoppingCartMapper.list(shoppingCart);
         log.info("购物车数据：{}", list);
         //判断当前菜品或套餐是否在购物车中
@@ -103,7 +103,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     /**
-     * 减少购物车
+     * 减少购物车菜品或套餐
      *
      * @param shoppingCartDTO
      */
@@ -114,9 +114,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         //获取用户id
         Long userId = BaseContext.getCurrentId();
         shoppingCart.setUserId(userId);
-
+        //查询用户的购物车
         List<ShoppingCart> list = shoppingCartMapper.list(shoppingCart);
         if (!list.isEmpty()) {
+            //获取购物车数据
             ShoppingCart cart = list.get(0);
 
             if (cart.getNumber() == 1) {
