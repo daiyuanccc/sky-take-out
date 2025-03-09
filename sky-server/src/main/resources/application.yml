@@ -60,6 +60,10 @@ sky:
     appid: ${sky.wechat.appid}
     secret: ${sky.wechat.secret}
 
+  shop:
+    address: 广西壮族自治区南宁市武鸣区新宁路508号
+  baidu:
+    ak: gtrQUKK8XbvCHtUZAUW5FbRXUvcOuZIG
 
 
 

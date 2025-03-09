@@ -71,7 +71,11 @@ public class OrderController {
         PageResult pageResult = orderService.pageQuery(ordersPageQueryDTO);
         return Result.success(pageResult);
     }
-
+    /*@GetMapping("/historyOrders")
+    public Result<PageResult> page(int page, int pageSize, Integer status) {
+        PageResult pageResult = orderService.pageQueryUser(page, pageSize, status);
+        return Result.success(pageResult);
+    }*/
 
     /**
      * 取消订单
