@@ -9,11 +9,13 @@
         (number, status, user_id, address_book_id, order_time, checkout_time, pay_method, pay_status, amount, remark,
          phone, address, user_name, consignee, cancel_reason, rejection_reason, cancel_time, estimated_delivery_time,
          delivery_status, delivery_time, pack_amount, tableware_number, tableware_status)
-        values
-        (#{number}, #{status}, #{userId}, #{addressBookId}, #{orderTime}, #{checkoutTime}, #{payMethod}, #{payStatus},
-         #{amount}, #{remark}, #{phone}, #{address}, #{userName}, #{consignee}, #{cancelReason}, #{rejectionReason},
-         #{cancelTime}, #{estimatedDeliveryTime}, #{deliveryStatus}, #{deliveryTime}, #{packAmount}, #{tablewareNumber},
-         #{tablewareStatus})
+        values (#{number}, #{status}, #{userId}, #{addressBookId}, #{orderTime}, #{checkoutTime}, #{payMethod},
+                #{payStatus},
+                #{amount}, #{remark}, #{phone}, #{address}, #{userName}, #{consignee}, #{cancelReason},
+                #{rejectionReason},
+                #{cancelTime}, #{estimatedDeliveryTime}, #{deliveryStatus}, #{deliveryTime}, #{packAmount},
+                #{tablewareNumber},
+                #{tablewareStatus})
 
     </insert>
     <update id="update" parameterType="com.sky.entity.Orders">
@@ -46,5 +48,98 @@
         </set>
         where id = #{id}
     </update>
+
+    <!-- 定义结果映射 -->
+    <resultMap id="OrderVOResultMap" type="com.sky.vo.OrderVO">
+        <id column="id" property="id"/>
+        <result column="order_number" property="number"/>  <!-- 映射订单号 -->
+        <result column="status" property="status"/>
+        <result column="user_id" property="userId"/>
+        <result column="address_book_id" property="addressBookId"/>
+        <result column="order_time" property="orderTime"/>
+        <result column="checkout_time" property="checkoutTime"/>
+        <result column="pay_method" property="payMethod"/>
+        <result column="pay_status" property="payStatus"/>
+        <result column="amount" property="amount"/>
+        <result column="remark" property="remark"/>
+        <result column="phone" property="phone"/>
+        <result column="address" property="address"/>
+        <result column="user_name" property="userName"/>
+        <result column="consignee" property="consignee"/>
+        <result column="cancel_reason" property="cancelReason"/>
+        <result column="rejection_reason" property="rejectionReason"/>
+        <result column="cancel_time" property="cancelTime"/>
+        <result column="estimated_delivery_time" property="estimatedDeliveryTime"/>
+        <result column="delivery_status" property="deliveryStatus"/>
+        <result column="delivery_time" property="deliveryTime"/>
+        <result column="pack_amount" property="packAmount"/>
+        <result column="tableware_number" property="tablewareNumber"/>
+        <result column="tableware_status" property="tablewareStatus"/>
+
+        <!-- 处理 order_detail 表的数据 -->
+        <collection property="orderDetailList" ofType="com.sky.entity.OrderDetail">
+            <id column="od_id" property="id"/>
+            <result column="order_id" property="orderId"/>
+            <result column="dish_id" property="dishId"/>
+            <result column="setmeal_id" property="setmealId"/>
+            <result column="dish_flavor" property="dishFlavor"/>
+            <result column="od_name" property="name"/>
+            <result column="image" property="image"/>
+            <result column="od_number" property="number"/>  <!-- 映射订单详情中的数量 -->
+            <result column="od_amount" property="amount"/>
+        </collection>
+    </resultMap>
+    <!-- 分页查询 -->
+    <select id="pageQuery" resultMap="OrderVOResultMap">
+        SELECT
+        o.id,
+        o.number AS order_number,  <!-- 使用别名 order_number 表示订单号 -->
+        o.status,
+        o.user_id,
+        o.address_book_id,
+        o.order_time,
+        o.checkout_time,
+        o.pay_method,
+        o.pay_status,
+        o.amount,
+        o.remark,
+        o.phone,
+        o.address,
+        o.user_name,
+        o.consignee,
+        o.cancel_reason,
+        o.rejection_reason,
+        o.cancel_time,
+        o.estimated_delivery_time,
+        o.delivery_status,
+        o.delivery_time,
+        o.pack_amount,
+        o.tableware_number,
+        o.tableware_status,
+        od.id AS od_id,
+        od.order_id,
+        od.dish_id,
+        od.setmeal_id,
+        od.dish_flavor,
+        od.name AS od_name,
+        od.image,
+        od.number AS od_number,  <!-- 使用别名 od_number 表示订单详情中的数量 -->
+        od.amount AS od_amount
+        FROM
+        orders o
+        LEFT JOIN
+        order_detail od ON o.id = od.order_id
+        <where>
+            <if test="userId!=null">
+                and o.user_id = #{userId}
+            </if>
+            <if test="status != null">
+                and o.status = #{status}
+            </if>
+        </where>
+        ORDER BY
+        o.order_time DESC
+    </select>
+
 
 </mapper>
