@@ -260,7 +260,7 @@ public class OrderServiceImpl implements OrderService {
                 }
                 // 根据订单id添加订单明细
                 for (OrderDetail detail : orderDetailList) {
-                    if (detail.getOrderId().equals(orderId)){
+                    if (detail.getOrderId().equals(orderId)) {
                         orderVO.getOrderDetailList().add(detail);
                     }
                 }
@@ -316,12 +316,6 @@ public class OrderServiceImpl implements OrderService {
         orderVO.setOrderDetailList(orderDetailList);
         return orderVO;
     }
-
-    /**
-     * 催单
-     *
-     * @param id
-     */
 
 
     /**
@@ -482,6 +476,47 @@ public class OrderServiceImpl implements OrderService {
         orders.setDeliveryTime(LocalDateTime.now());
 
         orderMapper.update(orders);
+    }
+
+    /**
+     * 客户催单
+     *
+     * @param id
+     */
+    @Override
+    public void reminder(Long id) {
+        // 根据id查询订单
+        Orders ordersDB = orderMapper.getById(id);
+
+        // 校验订单是否存在
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        // 获取当前时间
+        LocalDateTime now = LocalDateTime.now();
+
+        // 检查最后一次催单时间,防止频繁催单
+        if (ordersDB.getLastReminderTime() != null) {
+            LocalDateTime lastReminderTime = ordersDB.getLastReminderTime();
+            LocalDateTime nextAllowedTime = lastReminderTime.plusMinutes(5); // 5分钟间隔
+
+            if (now.isBefore(nextAllowedTime)) {
+                throw new OrderBusinessException(MessageConstant.REMINDER_TIME_ERROR);
+            }
+        }
+        // 更新最后一次催单时间为当前时间
+        ordersDB.setLastReminderTime(now);
+        orderMapper.update(ordersDB);
+
+        // 构建催单消息
+        Map map = new HashMap();
+        map.put("type", 2);//2代表小程序端催单消息
+        map.put("orderId", id);
+        map.put("content", "订单号：" + ordersDB.getNumber());
+        String json = JSON.toJSONString(map);
+        // 通过WebSocket将消息广播到客户端
+        webSocketServer.sendToAllClient(json);
+
     }
 
     /**

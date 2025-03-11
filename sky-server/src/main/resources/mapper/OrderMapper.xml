@@ -45,6 +45,9 @@
             <if test="deliveryTime != null">
                 delivery_time = #{deliveryTime}
             </if>
+            <if test="lastReminderTime !=null">
+                last_reminder_time = #{lastReminderTime}
+            </if>
         </set>
         where id = #{id}
     </update>
@@ -171,6 +174,24 @@
                sum(case when status = 3 then 1 else 0 end) as confirmed,
                sum(case when status = 4 then 1 else 0 end) as deliveryInProgress
         from orders
+    </select>
+    <select id="sumMap" resultType="java.lang.Double">
+        select sum(amount) from orders
+        <where>
+            <if test="begin != null">
+                and order_time &gt;= #{begin}
+            </if>
+            <if test="end != null">
+                and order_time &lt;= #{end}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+    <select id="sumMapByDateRange" resultType="java.util.Map">
+
+
     </select>
 
 
