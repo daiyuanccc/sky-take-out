@@ -45,6 +45,9 @@
             <if test="deliveryTime != null">
                 delivery_time = #{deliveryTime}
             </if>
+            <if test="lastReminderTime !=null">
+                last_reminder_time = #{lastReminderTime}
+            </if>
         </set>
         where id = #{id}
     </update>
