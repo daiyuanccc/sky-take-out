@@ -55,11 +55,7 @@ public interface OrderService {
      */
     OrderVO orderDetail(Long id);
 
-    /**
-     * 催单
-     * @param id
-     */
-    void reminder(long id);
+
 
     /**
      * 再来一单

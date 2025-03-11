@@ -21,6 +21,7 @@ import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,8 @@ public class OrderServiceImpl implements OrderService {
     private AddressBookMapper addressBookMapper;
     @Autowired
     private WeChatPayUtil weChatPayUtil;
+    @Autowired
+    private WebSocketServer webSocketServer;
 
     private static long orderId;
 
@@ -165,6 +168,17 @@ public class OrderServiceImpl implements OrderService {
 
         orderMapper.updateStatus(orderStatus, orderPaidStatus, check_out_time, orderId);
 
+        // 通过WebSocket向客户端浏览器推送消息
+        // 根据订单号查询订单
+        Orders ordersDB = orderMapper.getByNumber(ordersPaymentDTO.getOrderNumber());
+        log.info("订单状态为：{}，推送给客户端浏览器", ordersDB.getStatus());
+        Map map = new HashMap();
+        map.put("type", 1);// 1表示来单提醒,2表示客户催单
+        map.put("orderId", ordersDB.getId());
+        map.put("content", "订单号：" + ordersPaymentDTO.getOrderNumber());
+
+        String jsonString = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(jsonString);
 
         return vo;
     }
@@ -188,6 +202,16 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+
+        // 通过WebSocket向客户端浏览器推送消息
+        log.info("订单状态为：{}，推送给客户端浏览器", ordersDB.getStatus());
+        Map map = new HashMap();
+        map.put("type", 1);// 1表示来单提醒,2表示客户催单
+        map.put("orderId", ordersDB.getId());
+        map.put("content", "订单号：" + ordersDB.getNumber());
+
+        String jsonString = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(jsonString);
     }
 
     /**
@@ -298,11 +322,7 @@ public class OrderServiceImpl implements OrderService {
      *
      * @param id
      */
-    @Override
-    public void reminder(long id) {
-        log.info("订单{}催单", id);
 
-    }
 
     /**
      * 再来一单
