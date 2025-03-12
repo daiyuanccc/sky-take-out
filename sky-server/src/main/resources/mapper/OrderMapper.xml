@@ -52,6 +52,7 @@
         where id = #{id}
     </update>
 
+
     <!-- 定义结果映射 -->
     <resultMap id="OrderVOResultMap" type="com.sky.vo.OrderVO">
         <id column="id" property="id"/>
@@ -189,9 +190,18 @@
             </if>
         </where>
     </select>
-    <select id="sumMapByDateRange" resultType="java.util.Map">
 
-
+    <select id="sumTurnoverByDate" resultType="java.util.Map">
+        SELECT
+            DATE(order_time) as date,
+            SUM(amount) as turnover
+        FROM
+            orders
+        WHERE
+            order_time BETWEEN #{begin} AND #{end}
+          AND status = #{status}
+        GROUP BY
+            DATE(order_time)
     </select>
 
 
