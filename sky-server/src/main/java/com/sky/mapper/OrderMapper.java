@@ -98,5 +98,11 @@ public interface OrderMapper {
     @MapKey("date")
     List<Map<String, Object>> sumTurnoverByDate(Map<String, Object> params);
 
+    /**
+     * 动态条件查询订单数量
+     * @param map
+     * @return
+     */
+    Integer countByMap(Map map);
 
 }
