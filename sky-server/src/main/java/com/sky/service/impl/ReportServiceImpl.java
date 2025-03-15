@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -163,6 +164,7 @@ public class ReportServiceImpl implements ReportService {
                 .newUserList(StringUtils.join(newUserList, ","))
                 .build();
     }
+
 
 
 }

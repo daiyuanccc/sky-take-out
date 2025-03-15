@@ -22,4 +22,6 @@ public interface ReportService {
      * @return
      */
     UserReportVO getUserStatistics(LocalDate begin, LocalDate end);
+
 }
+
