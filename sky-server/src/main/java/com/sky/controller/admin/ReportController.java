@@ -3,6 +3,7 @@ package com.sky.controller.admin;
 import com.sky.result.Result;
 import com.sky.service.ReportService;
 import com.sky.vo.OrderReportVO;
+import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class ReportController {
 
     /**
      * 统计营业额
+     *
      * @param begin
      * @param end
      * @return
@@ -38,23 +40,46 @@ public class ReportController {
 
     /**
      * 统计用户数据
+     *
      * @param begin
      * @param end
      * @return
      */
     @GetMapping("/userStatistics")
     public Result<UserReportVO> userStatistics(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
-                                                @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+                                               @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
         log.info("查询用户数据：{}到{}", begin, end);
         UserReportVO userReportVO = reportService.getUserStatistics(begin, end);
         return Result.success(userReportVO);
     }
 
+    /**
+     * 统计订单数据
+     *
+     * @param begin
+     * @param end
+     * @return
+     */
     @GetMapping("/ordersStatistics")
     public Result<OrderReportVO> ordersStatistics(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
-                                               @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+                                                  @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
         log.info("查询订单数据：{}到{}", begin, end);
-        OrderReportVO userReportVO = reportService.getOrderStatistics(begin, end);
-        return Result.success(userReportVO);
+        OrderReportVO orderReportVO = reportService.getOrderStatistics(begin, end);
+        return Result.success(orderReportVO);
+    }
+
+    /**
+     * 查询销量top10
+     *
+     * @param begin
+     * @param end
+     * @return
+     */
+    @GetMapping("/top10")
+    public Result<SalesTop10ReportVO> top10(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+                                            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+        log.info("查询销量top10数据：{}到{}", begin, end);
+        SalesTop10ReportVO salesTop10 = reportService.getSalesTop10(begin, end);
+        return Result.success(salesTop10);
     }
 }

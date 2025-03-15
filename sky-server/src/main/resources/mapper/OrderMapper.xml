@@ -218,6 +218,21 @@
             </if>
         </where>
     </select>
+    <select id="getSalesTop10" resultType="com.sky.dto.GoodsSalesDTO">
+        select od.name,
+               sum(od.number) as number
+        from order_detail od
+                 left join orders d on od.order_id = d.id and d.status = 5
+        <if test="begin != null">
+            and d.order_time &gt;= #{begin}
+        </if>
+        <if test="end != null">
+            and d.order_time &lt;= #{end}
+        </if>
+        group by od.name
+        order by number desc
+        limit 0,10
+    </select>
 
 
 </mapper>
